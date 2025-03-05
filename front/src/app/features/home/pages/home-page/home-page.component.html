@@ -1,0 +1,24 @@
+<app-page-content>
+    <section class="home-todo-list">
+        <app-todo-form (saveTask)="submitFormAndLoadTaskList($event)"
+                       [taskData]="taskData"
+        />
+        <div class="content-list">
+            @if(getTaskList(); as data) {
+                @for (item of data; track item) {
+                    <app-todo-list class="item"
+                                   [task]="item"
+                                   (deleteTask)="deleteTask($event)"
+                                   (editTask)="editTaskInForm($event)"
+                    
+                    />
+                } @empty {
+                    <p>Nenhuma Tarefa Cadastrada</p>
+                }
+            } @else { 
+                <p>Loading ...</p>
+            }
+        </div>
+    </section>
+</app-page-content>
+

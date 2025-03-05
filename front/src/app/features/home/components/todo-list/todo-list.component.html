@@ -1,0 +1,13 @@
+<div class="item-list">
+    <div class="header">
+        <span>{{task.title}}</span>
+        <small>{{task.createdAt | date: 'd/M/yyyy'}}</small>
+    </div>
+    <div class="content">
+        <p>{{task.description}}</p>
+    </div>
+    <div class="actions">
+        <mat-icon class="icon" (click)="edit(task)">edit</mat-icon>
+        <mat-icon class="icon" (click)="delete(task)">delete</mat-icon>
+    </div>
+</div>

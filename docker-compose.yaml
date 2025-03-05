@@ -3,7 +3,7 @@ services:
     depends_on:
       - api
     container_name: front_desafio
-    build: ./frontend
+    build: ./front
     ports:
       - 4200:4200
     # volumes:

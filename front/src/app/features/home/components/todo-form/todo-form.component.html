@@ -1,0 +1,24 @@
+<div class="task-form">
+    <form [formGroup]="form" (ngSubmit)="saveAndInitForm()">
+
+        <mat-form-field class="example-full-width">
+            <mat-label>Tarefa</mat-label>
+            <input type="text" matInput formControlName="title"
+                   placeholder="Digite um nome para Tarefa">
+            <mat-hint>Errors appear instantly!</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field class="example-full-width">
+            <mat-label>Descrição</mat-label>
+            <textarea matInput placeholder="Descrição da Tarefa" formControlName="description">1600 Amphitheatre Pkwy</textarea>
+            <mat-hint>Errors appear instantly!</mat-hint>
+        </mat-form-field>
+
+        <div class="content-actions">
+            <button mat-flat-button 
+                    type="submit"
+                    [disabled]="!form.valid">Salvar</button>
+        </div>
+    
+    </form>
+</div>
