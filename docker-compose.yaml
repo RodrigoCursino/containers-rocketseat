@@ -1,0 +1,100 @@
+services:
+  frontend:
+    depends_on:
+      - api
+    container_name: front_desafio
+    build: ./frontend
+    ports:
+      - 4200:4200
+    # volumes:
+    #   - rocket-front-vol:/usr/src/front/src
+    networks:
+      - desafio-app-network
+  db:
+    image: mysql:8
+    container_name: db
+    restart: always
+    volumes:
+      - bd-desafio-rocket:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=desafio
+      - MYSQL_ROOT_HOST=%
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - desafio-app-network
+
+  vault:
+    build: ./vault
+    container_name: vault
+    restart: always
+    cap_add:
+      - IPC_LOCK
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=desafio-rocketseat
+      - VAULT_ADDR=http://vault:8200
+    ports:
+      - 8200:8200
+    networks:
+      - desafio-app-network
+    volumes:
+      - vault-data:/vault
+      - ./vault-init.sh:/vault-init.sh
+      - ./vault.hcl:/vault/config/vault.hcl
+    # command: ["sh", "-c", "vault server -dev & until vault status -address=http://localhost:8200; do echo 'Aguardando o Vault iniciar...'; sleep 5; done; sh /vault-init.sh && tail -f /dev/null"]
+    command: ["CMD", "-c", "vault server -dev & sh /vault-init.sh && tail -f /dev/null"]
+    # command: ["vault", "server", "-dev"]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://localhost:8200"]
+      interval: 15s
+      retries: 10
+      start_period: 60s  # Dê um tempo maior para o Vault iniciar
+      
+  api:
+    build: ./api
+    container_name: api_desafio
+    ports:
+      - 3000:3000
+    networks:
+      - desafio-app-network
+    environment:
+      - DB_HOST=db
+      - DB_USER=vault_user
+      - DB_PASSWORD=vault_password
+      - DB_NAME=desafio
+    depends_on:
+      vault:
+        condition: service_healthy  # Espera o Vault estar pronto
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  vault-data:
+    name: vault_desafio_rockeatseat
+  bd-desafio-rocket:
+    name: db_desafio_rockeatseat
+  # rocket-front-vol:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     device: ~/Documentos/estudos/rocketseat/devOps/containers/desafio_vol/frontend/src  # Caminho no host
+  #     o: bind  # Define que é um bind mount (liga um diretório do host)
+
+networks:
+  desafio-app-network:
+    name: desafio-app-network
+    external: false
+    driver: bridge
+
