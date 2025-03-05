@@ -45,16 +45,16 @@ services:
       - desafio-app-network
     volumes:
       - vault-data:/vault
-      - ./vault-init.sh:/vault-init.sh
-      - ./vault.hcl:/vault/config/vault.hcl
+      - ./vault/vault-init.sh:/vault-init.sh
+      - ./vault/vault.hcl:/vault/config/vault.hcl
     # command: ["sh", "-c", "vault server -dev & until vault status -address=http://localhost:8200; do echo 'Aguardando o Vault iniciar...'; sleep 5; done; sh /vault-init.sh && tail -f /dev/null"]
-    command: ["CMD", "-c", "vault server -dev & sh /vault-init.sh && tail -f /dev/null"]
+    command: ["/bin/sh", "-c", "vault server -dev & sh /vault-init.sh && tail -f /dev/null"]
     # command: ["vault", "server", "-dev"]
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "vault", "status", "-address=http://localhost:8200"]
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8200/v1/sys/seal-status | grep 'sealed\":false'"]
       interval: 15s
       retries: 10
       start_period: 60s  # Dê um tempo maior para o Vault iniciar

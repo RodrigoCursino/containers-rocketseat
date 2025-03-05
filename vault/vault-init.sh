@@ -2,7 +2,7 @@
 #curl --header "X-Vault-Token: desafio-rocketseat" http://vault:8200/v1/database/creds/desafio-rocketseat-role
 
 echo "Aguardando o Vault iniciar..."
-until vault status -address=http://vault:8200 | grep "Sealed: false"; do
+until wget -qO- http://vault:8200/v1/sys/seal-status | grep '"sealed":false'; do
   echo "Vault não está pronto... aguardando..."
   sleep 5
 done
